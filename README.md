@@ -1,10 +1,15 @@
 
-# Docket QC Checker — Web (Improved Text Extraction)
+# Docket QC Checker — pdfminer-only
 
-This version adds a **pdfminer.six** fallback. If your PDF still shows *"Could not extract text"*, it is likely a **scanned image**. Please **OCR** the file first using:
-- **Adobe Acrobat** → Scan & OCR → Recognize Text.
-- **PDF24 Creator** (Windows, free) → OCR.
-- **Smallpdf / iLovePDF OCR** (online; check privacy conditions).
+This build uses only **pdfminer.six** for text extraction (more reliable on Streamlit Cloud).
 
 ## Deploy
-- Upload `app.py`, `requirements.txt`, `README.md` to GitHub → Deploy on Streamlit Cloud.
+1. Create a GitHub repo and upload:
+   - app.py
+   - requirements.txt
+   - README.md
+2. On https://share.streamlit.io → New app → pick your repo → set main file to `app.py` → Deploy.
+
+## Debugging
+- Page 1 text preview is shown in the app. If it displays readable text, extraction works.
+- If it's empty, the PDF is likely image-only or encrypted. OCR it once, then try again.
