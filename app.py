@@ -4,7 +4,7 @@ import re
 import zipfile
 import pandas as pd
 import streamlit as st
-from PyPDF2 import PdfReader
+from pypdf import PdfReader
 
 st.set_page_config(page_title="Docket QC Checker (PyPDF2 + Text Download)", layout="wide")
 st.title("🧰 Docket QC Checker — PyPDF2")
