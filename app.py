@@ -3,16 +3,21 @@ import io
 import re
 import pandas as pd
 import streamlit as st
-from pdfminer.high_level import extract_text
+from pypdf import PdfReader
 
-st.set_page_config(page_title="Docket QC Checker (pdfminer-only)", layout="wide")
-st.title("🧰 Docket QC Checker — pdfminer-only")
-st.caption("This build extracts text using only pdfminer.six for maximum reliability on Streamlit Cloud.")
+st.set_page_config(page_title="Docket QC Checker (pypdf-only)", layout="wide")
+st.title("🧰 Docket QC Checker — pypdf-only")
+st.caption("This build extracts text using only `pypdf`, which installs cleanly on Streamlit Cloud.")
 
 def extract_text_pages(pdf_bytes):
-    full = extract_text(io.BytesIO(pdf_bytes)) or ""
-    pages = full.split("\f") if full else []
-    return [p if p is not None else "" for p in pages]
+    reader = PdfReader(io.BytesIO(pdf_bytes))
+    pages = []
+    for page in reader.pages:
+        try:
+            pages.append(page.extract_text() or "")
+        except Exception:
+            pages.append("")
+    return pages
 
 CHAIN_LINE = re.compile(r'\b(\d{2,4})(?:\s*\+\s*|\s+)(\d{2,4})(?:(?:\s*\+\s*|\s+)(\d{2,4})){1,20}')
 MODULE_WITH_TRIPLE = re.compile(r'(?P<mod>[A-Za-z0-9\-_/]+)\s*[-: ]\s*(?P<w>\d{2,4})\s*[x×]\s*(?P<d>\d{2,4})\s*[x×]\s*(?P<h>\d{2,4})')
@@ -34,7 +39,7 @@ def parse_pdf_text(pages):
     records = []
     current = "Unknown"
     for pageno, text in enumerate(pages, start=1):
-        lines = (text or "").splitlines()
+        lines = (text or "")..splitlines()
         for line in lines:
             lbl = section_label(line)
             if lbl: current = lbl
