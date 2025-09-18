@@ -1,15 +1,16 @@
 
-# Docket QC Checker — pypdf-only
+# Docket QC Checker — PyPDF2 + Text Download
 
-This build uses only **pypdf** for text extraction, which installs cleanly on Streamlit Cloud.
+This build uses **PyPDF2** for extraction and adds:
+- Download raw text for a selected page (.txt)
+- Download all pages as a ZIP of .txt files
 
 ## Deploy
-1. Create/Use your GitHub repo and upload:
+1. Upload these to your GitHub repo:
    - app.py
    - requirements.txt
    - README.md
-2. On https://share.streamlit.io → New app → set main file to `app.py` → Deploy.
+2. On https://share.streamlit.io → New app or Manage app → set main file to `app.py` → Deploy.
 
-## Debugging
-- Page 1 text preview is shown in the app. If it displays readable text, extraction works.
-- If it's empty, the PDF is likely image-only or encrypted. OCR it once, then try again.
+## Notes
+- If Page 1 preview is empty, the PDF might be image-only or encrypted → OCR it once and try again.
