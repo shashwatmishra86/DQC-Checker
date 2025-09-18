@@ -39,7 +39,7 @@ def parse_pdf_text(pages):
     records = []
     current = "Unknown"
     for pageno, text in enumerate(pages, start=1):
-        lines = (text or "")..splitlines()
+        lines = (text or "").splitlines()
         for line in lines:
             lbl = section_label(line)
             if lbl: current = lbl
