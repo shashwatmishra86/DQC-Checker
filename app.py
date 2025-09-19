@@ -1,17 +1,16 @@
 
 import io
 import re
-import zipfile
 import pandas as pd
 import streamlit as st
-from pypdf import PdfReader
+import PyPDF2
 
-st.set_page_config(page_title="Docket QC Checker (PyPDF2 + Text Download)", layout="wide")
-st.title("🧰 Docket QC Checker — PyPDF2")
-st.caption("This build extracts text using PyPDF2 and lets you download raw text per-page for debugging.")
+st.set_page_config(page_title="Docket QC Checker (PyPDF2 pinned)", layout="wide")
+st.title("🧰 Docket QC Checker — PyPDF2 (pinned 3.0.1)")
+st.caption("Text extraction via PyPDF2; includes Page 1 preview and raw text download.")
 
 def extract_text_pages(pdf_bytes):
-    reader = PdfReader(io.BytesIO(pdf_bytes))
+    reader = PyPDF2.PdfReader(io.BytesIO(pdf_bytes))
     pages = []
     for page in reader.pages:
         try:
@@ -21,8 +20,8 @@ def extract_text_pages(pdf_bytes):
     return pages
 
 CHAIN_LINE = re.compile(r'\b(\d{2,4})(?:\s*\+\s*|\s+)(\d{2,4})(?:(?:\s*\+\s*|\s+)(\d{2,4})){1,20}')
-MODULE_WITH_TRIPLE = re.compile(r'(?P<mod>[A-Za-z0-9\-_\/]+)\s*[-: ]\s*(?P<w>\d{2,4})\s*[x×]\s*(?P<d>\d{2,4})\s*[x×]\s*(?P<h>\d{2,4})')
-MODULE_SPACE_TRIPLE = re.compile(r'(?P<mod>[A-Za-z0-9\-_\/]+)\s+(?P<w>\d{2,4})\s*[x×]\s*(?P<d>\d{2,4})\s*[x×]\s*(?P<h>\d{2,4})')
+MODULE_WITH_TRIPLE = re.compile(r'(?P<mod>[A-Za-z0-9\-_/]+)\s*[-: ]\s*(?P<w>\d{2,4})\s*[x×]\s*(?P<d>\d{2,4})\s*[x×]\s*(?P<h>\d{2,4})')
+MODULE_SPACE_TRIPLE = re.compile(r'(?P<mod>[A-Za-z0-9\-_/]+)\s+(?P<w>\d{2,4})\s*[x×]\s*(?P<d>\d{2,4})\s*[x×]\s*(?P<h>\d{2,4})')
 
 def section_label(line):
     t = line.upper()
@@ -33,7 +32,7 @@ def section_label(line):
     if "ELEVATION B" in t and "INTERNAL" not in t: return "Elevation B"
     if "ELEVATION C" in t and "INTERNAL" not in t: return "Elevation C"
     if "ELEVATION D" in t and "INTERNAL" not in t: return "Elevation D"
-    if "CONSOLATED CABINETS LIST" in t or "CONSOLIDATED CABINETS LIST" in t: return "Consolidated"
+    if "CONSOLIDATED CABINETS LIST" in t: return "Consolidated"
     return None
 
 def parse_pdf_text(pages):
@@ -128,31 +127,10 @@ if pdf:
         st.stop()
     st.code((pages[0] or "")[:1500] or "[Page 1 looked empty]", language="text")
 
-    # --- Download raw text per page ---
-    st.subheader("Download Raw Text")
-    page_nums = list(range(1, len(pages)+1))
-    sel = st.selectbox("Choose a page to download as .txt:", page_nums, index=0)
-    if st.button("Download selected page (.txt)"):
-        content = pages[sel-1] or ""
-        st.download_button(
-            label=f"Save page {sel} text",
-            data=content.encode("utf-8"),
-            file_name=f"page_{sel}.txt",
-            mime="text/plain"
-        )
-
-    # Download all pages as a ZIP
-    if st.button("Download ALL pages (.zip of .txt)"):
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
-            for i, ptxt in enumerate(pages, start=1):
-                z.writestr(f"page_{i}.txt", (ptxt or "").encode("utf-8"))
-        st.download_button(
-            label="Save ZIP of all pages",
-            data=buf.getvalue(),
-            file_name="pdf_pages_text.zip",
-            mime="application/zip"
-        )
+    st.download_button("Download Page 1 text (.txt)",
+                       data=(pages[0] or "").encode("utf-8"),
+                       file_name="page_1.txt",
+                       mime="text/plain")
 
     df = parse_pdf_text(pages)
     with st.expander("Parsed records (debug)"):
